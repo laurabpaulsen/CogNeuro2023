@@ -131,7 +131,6 @@ else:  # for some reason there is a discrepancy between the measured mouse locat
 mouse = event.Mouse(visible=True, win=win)
 
 KEYS_QUIT = ['escape','q']  # Keys that quits the experiment
-KEYS_trigger=['t'] # The MR scanner sends a "t" to notify that it is starting
 
 MAX_LENGTH_TRIAL = 500 # The maximum number of frames in each trial
 
