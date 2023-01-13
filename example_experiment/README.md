@@ -1,3 +1,5 @@
+# Example experiment
+
 This directory is an example of how to structure and run an EEG experiment using PsychoPy. This can be used as inspiration for your own project. 
 
 
