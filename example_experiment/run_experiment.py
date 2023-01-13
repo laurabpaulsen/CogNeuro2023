@@ -1,6 +1,5 @@
 """ DESCRIPTION:
 This combined EEG and mouse tracking experiment displays two stimuli on either side of the screen. Before this presentation a word indicates what the participant should click on. The stimuli can either be neutral (line-drawings), color congruent, or color incongruent (color of stimuli switched around). 
-The experiment lasts around 10 minutes and has 172 trials (including practice trials)
 
 /Code written by Laura Bock Paulsen 2022, adapted from a OpenSesame experiment by Jessica Clarke and Sille Hasselbalch.
 
