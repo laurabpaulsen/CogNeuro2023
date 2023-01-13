@@ -1,0 +1,10 @@
+left_image;right_image;trial_type;correct_response;category;task;phase
+tornado_gra.png;lyn_gul.png;congruent;right;mood;lightning;practise
+lyn_gra.png;tornado_gul.png;incongruent;left;mood;lightning;practise
+zebra_hvid.png;blek_lilla.png;congruent;left;animal;zebra;practise
+zebra_lilla.png;blek_hvid.png;incongruent;right;animal;octopus;practise
+ost_gul.png;chili_rod.png;congruent;left;food;cheese;practise
+ost_rod.png;chili_gul.png;incongruent;right;food;chili;practise
+tornado.png;lyn.png;neutral;right;mood;lightning;practise
+zebra.png;blek.png;neutral;right;animal;octopus;practise
+ost.png;chili.png;neutral;left;food;cheese;practise
