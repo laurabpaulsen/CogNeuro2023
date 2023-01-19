@@ -15,5 +15,6 @@ This directory is an example of how to structure and run an EEG experiment using
 │   ├── ost_rod.png
 │   └── ...       
 ├── README.md                           <- The top-level README for this project.  
-└── run_experiment.py                   <- Script for running the experiment
+├── run_experiment.py                   <- Script for running the experiment
+└── triggers.py                         <- Script for sending triggers to the EEG system (imported into run_experiment.py)
 ```

@@ -3,7 +3,8 @@ This combined EEG and mouse tracking experiment displays two stimuli on either s
 
 /Code written by Laura Bock Paulsen 2022, adapted from a OpenSesame experiment by Jessica Clarke and Sille Hasselbalch.
 
-Structure:  
+Structure of this script:
+    IMPORT MODULES 
     DEFINE HELPER FUNCTIONS
     GET PARTICIPANT INFO USING GUI
     PREPARE LOG FILES
@@ -12,10 +13,9 @@ Structure:
     FUNCTION FOR EXPERIMENTAL LOOP
     DISPLAY INTRO TEXT AND AWAIT SCANNER TRIGGER
     CALL FUNCTION RUNNING THE EXPERIMENTAL LOOP
-    
-"""
 
-# Import the modules that we need in this script
+"""
+# IMPORT MODULES
 from psychopy import core, visual, event, gui, monitors
 import pandas as pd
 from datetime import datetime
@@ -143,6 +143,8 @@ def make_trial_list(trial_df):
     
     for i in range(len(trial_df)):
         data = trial_df.loc[i]
+
+        # Define the trigger codes
         if data['trial_type'] == 'neutral':
             TRIG_I = 11
             TRIG_W = 12
@@ -152,6 +154,7 @@ def make_trial_list(trial_df):
         if data['trial_type'] == 'incongruent':
             TRIG_I = 31
             TRIG_W = 32
+            
         # Add a dictionary for every trial
         trial_list += [{
             'ID': V['ID'],
