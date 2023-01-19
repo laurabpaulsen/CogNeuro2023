@@ -29,7 +29,7 @@ RETINA = True  # Set to True if you are using a mac with retina display, set to 
 
 
 if not BEHAVIOURAL:
-    from trigger import setParallelData
+    from triggers import setParallelData
 
 
 # Monitor parameters
