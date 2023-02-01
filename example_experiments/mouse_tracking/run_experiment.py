@@ -21,34 +21,17 @@ import pandas as pd
 from datetime import datetime
 import csv
 import os
+from triggers import setParallelData
 
 
 # Experimental parameters
-BEHAVIOURAL = True  # Set to True if you want to run the behavioural version of the experiment, set to False if you want to run the EEG version with triggers
 RETINA = True  # Set to True if you are using a mac with retina display, set to False if you are using a different operating system or a mac without retina display
-
-
-if not BEHAVIOURAL:
-    from triggers import setParallelData
-
 
 # Monitor parameters
 MON_DISTANCE = 60  # Distance between subject's eyes and monitor 
 MON_WIDTH = 20  # Width of your monitor in cm
 MON_SIZE = [1440, 900]  # Pixel-dimensions of your monitor
 FRAME_RATE = 60 # Hz
-
-# DEFINE HELPER FUNCTIONS
-# -----------------------
-# define function that sends triggers if you are running the EEG version of the experiment and prints the trigger code to the console if you are running the behavioural version
-def send_trigger(win, trigger_code, behavioural = True):
-    if behavioural:
-        print('Trigger code: ' + str(trigger_code))
-
-        return False
-    else:
-        win.callOnFlip(setParallelData, trigger_code)
-        return True
 
 
 # GET PARTICIPANT INFO USING GUI
@@ -207,11 +190,10 @@ def run_experiment(trial_list, exp_start):
         for frame in range(60):
             stim_text.draw()
             if frame==1: # pulls trigger or prints trigger code in frame 1
-                pullTriggerDown = send_trigger(win, trial['word_trigger'], behavioural = BEHAVIOURAL)
-
+                win.callOnFlip(setParallelData, trial['word_trigger'])  
             win.flip()
 
-            if pullTriggerDown: # only happens in the case of BEHAVIOURAL = False, as the send_trigger function always returns False if BEHAVIOURAL = True
+            if pullTriggerDown: 
                 win.callOnFlip(setParallelData, 0)
                 pullTriggerDown = False
 
@@ -235,7 +217,7 @@ def run_experiment(trial_list, exp_start):
 
 
             if frame==1:
-                pullTriggerDown = send_trigger(win, trial['img_trigger'], behavioural = BEHAVIOURAL)
+                win.callOnFlip(setParallelData, trial['img_trigger']) 
 
             win.flip()
 

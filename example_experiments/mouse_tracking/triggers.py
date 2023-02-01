@@ -29,3 +29,4 @@ except NotImplementedError:
 else:
     port.setData(0)
     setParallelData = port.setData
+

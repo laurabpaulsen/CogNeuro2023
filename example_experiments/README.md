@@ -1,1 +1,1 @@
-## Examples of experiments with triggers coded
+## Examples of experiments with triggers coded in Python
