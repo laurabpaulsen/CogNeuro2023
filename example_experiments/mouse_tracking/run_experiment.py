@@ -191,6 +191,7 @@ def run_experiment(trial_list, exp_start):
             stim_text.draw()
             if frame==1: # pulls trigger or prints trigger code in frame 1
                 win.callOnFlip(setParallelData, trial['word_trigger'])  
+                pullTriggerDown = True
             win.flip()
 
             if pullTriggerDown: 
@@ -218,6 +219,7 @@ def run_experiment(trial_list, exp_start):
 
             if frame==1:
                 win.callOnFlip(setParallelData, trial['img_trigger']) 
+                pullTriggerDown = True
 
             win.flip()
 
