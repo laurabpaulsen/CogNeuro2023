@@ -1,0 +1,264 @@
+---
+title: "WordFace behavioral analysis"
+author: "Laura Bock Paulsen, adapted from Mikkel Wallentin"
+date: "9/29/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+<style type="text/css">
+  body{
+  font-size: 12pt;
+}
+</style>
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(tidyverse, lme4)
+```
+
+# Introduction
+In this class, we will look at the behavioral data from those that have participated in the WordFace experiment. The learning outcome from this assignment is: 
+
+1.	to gather experience in analysing behavioural data
+
+2.	to practice critical assessment of data analysis options 
+
+3.	to train data plotting and reporting
+
+
+This class should give you a head start on your final project if you choose to use the WordFace experiment data (both EEG and fMRI). It is designed for you to start thinking about the possibilities with the WordFace experimental design, and prepare an analysis of the behavioural data which might come in handy when doing your final project. 
+
+# Data
+The data uploaded by you to Brightspace has been gathered and can be found through this link XXXXXX.
+
+## Experimental design
+In the experiment, participants see a word for each trial, followed by either a happy or fearful emoji. Their task is to press a button (b - index finger) if the face is happy and another (y - middle finger) if the face is fearful. 
+
+The word shown before each image belongs to one of three categories: negative valence (e.g. cancer), positive valence (e.g. smile), neutral valence (e.g. house). Positive words always predict a positive face, negative words always predict a negative face, and neutral words can be followed by both a happy or fearful face.  
+
+## Words and word sentiment
+Words are derived from the Binder et al. 2016 database: These words are rated on 65 semantic dimensions. Word data can be found here https://www.dropbox.com/ s/5ie1nzwk0k49ge9/WordSet1_Ratings.xlsx?dl=0 
+
+The Binder 2016 paper can be found here: https://www.dropbox.com/s/558c2riwn859ahu/Binder_2016_ Cognitive_Neuropsychology.pdf?dl=0 
+
+Word valence is determined using two sentiment scores, which are saved along with the data in the log-file: 
+1.“word_score_pc” was made using principal component analysis used to combine a subset of the semantic dimensions in the word data related to emotion. 
+2. “word_score_warriner” used scores from Warriner et al. 2013 (https://link.springer.com/article/10.3758/ s13428-012-0314-x). 
+
+
+# Exercises
+
+## Load and prep data
+The first goal is to load in the data and prepare it for analysis. This entails looping over each file and doing the following steps:
+
+1. Filter out negative reaction times (some times participants accidentally responded to the word rather than the face)
+
+2. Adding a column named `correct` with the percentage accurate in that given session
+
+3. Setting the ID to character (helps with binding the data together)
+
+4. Get the time of the day and add that to a column named `time`. For this purpose i have provided a function.
+
+5. Invert the `word_score_pc`
+Principal components come with unpredictable signs. Here positive has become negative, so we reverse it. 
+
+6. Adding some covariates that we can explore!!
+If the data set has more than one observation, we add information about the previous trial. That way we can explore, if the preceding trial influences the current one! The following should be added
+* Image
+* Word type
+* Word score
+
+7. Remove incorrect trials
+
+
+Here is the function for time of day! (#4)
+```{r, time_of_day function}
+time_of_day <- function(filename){
+  # extract the hour
+  h <- substr(filename, nchar(filename)-12, nchar(filename)-11)
+  
+  # extracing the minutes
+  m <- substr(filename, nchar(filename)-9, nchar(filename)-8)
+  
+  # turn the minutes into fractions of an hour (because there only is 60 minutes per hour)
+  m < -100 * (as.integer(m) /60)
+  #paste together as 4 digit number (ignoring that there are only 60 minutes per hour).
+  as.integer(paste(h,m,sep=''))
+}
+```
+
+
+
+
+### Code for loading and prepping data!
+I have created a skeleton and writen the code for some of the steps. Please make sure you understand what is going on in each of these steps! Furthermore, you sound fill in the blanks.
+```{r}
+data_dir <-"data" 
+
+# create a list of all the file names
+wordface_files <-list.files(data_dir ,pattern='+?).csv',full.names = TRUE)
+
+# looping over the files and loading in the data
+for(i in 1:length(wordface_files)){
+  
+  # load in data file
+  tmp_data <- read_csv(wordface_files[i], show_col_types = FALSE) # show_col_types FALSE to suppress output
+  
+  ## 1 ##
+  # filter out negative reaction times
+  tmp_data <- tmp_data %>% filter(rt > 0)
+  
+  ## 2 ##
+  # percentage accuracy in session
+  tmp_data$correct <- sum(tmp_data$correct_resp == 1)/length(tmp_data$correct_resp)
+  
+  ## 3 ##
+  # setting the ID to a character
+  tmp_data$ID <- as.character(tmp_data$ID)
+  
+  ## 4 ##
+  # get fraction of hour from time_of_day function
+  time <- time_of_day(wordface_files[i])
+  
+  # add the onset of the image to the fraction of hour
+  tmp_data$time <- time + (100 * (tmp_data$onset_img/60) /60)
+  
+  ## 5 ##
+  # invert word pc score
+  tmp_data$word_score_pc <- -tmp_data$word_score_pc
+  
+  ## 6 ## 
+  if(length(tmp_data$no)>1){ # checking to see if there is more than one row in tmp_data
+     
+     #list of indices of trials before (e.g., 1, 1, 2, 3, 4 ....)
+     oneback <-c(1, tmp_data$no[2:length(tmp_data$no)]-1)
+     
+     # creating a column with the image from the trial before
+     tmp_data$imgN1 <- tmp_data$img[oneback]
+     
+     # creating a column with the word type from the previous trial 
+     tmp_data$word_labelN1 <- tmp_data$word_label[oneback]
+     
+     # creating a column with the word score from the previous trial
+     tmp_data$word_score_pcN1<- -tmp_data$word_score_pc[oneback]
+     
+  }
+  
+  ## 7 ##
+  # removing incorrect trials
+  tmp_data <- tmp_data %>% filter(correct_resp > 0)
+  
+  
+  # appending the data frame unless i == 1
+  if(i==1){
+    data <- tmp_data
+  }
+  else{
+    data <- bind_rows(data,tmp_data)
+  }
+}
+
+
+## Change the ID to factor
+data$ID <- as.factor(data$ID)
+data$word_label <- as.factor(data$word_label)
+```
+
+## Analysis
+Okay holy moly what a ride! Now we have a clean beautiful data set, so now it is time to do some analysis!
+
+
+### What variables do we have?
+
+Inspect the variables from the log-file and those generated in the beginning of this exercise script. What hypotheses do they allow to be tested? Can you think of other hypotheses that the experiment could test? How could you prepare for this?
+
+**Note:** A list of the variables and explanations can be found on Brightspace (Shout out to Sara Kolding for the amazing file!!). Not all variables listed in this file are created here, but you can if you need any of them! This way it can also provide some inspiration for further investigation. 
+
+```{r}
+# no need for code just putting this chunk here so you realize that this is an exercise :DD
+```
+
+### Linear model
+Set up a linear mixed effects model, including the hypotheses you find interesting as fixed effects and those that you want to rule out as random effects.
+```{r, linear model investigating hypothesis}
+model1 <- lmer(rt ~ word_score_pc + (1|ID) +  (1|word), data=data)
+
+summary(model1)
+```
+
+## Critical assessment of data analysis options
+
+### Scaling and mean centering of variables
+Consider scaling variables. When analyzing data, mean centering of independent variables allow you to interpret the model intercept (as the mean of the dependent variable). Scaling of independent (e.g. by the standard deviation) put them on the same scale and allows you to compare regression coefficients across independent variables.
+
+
+This can be done using the `scale` function.
+
+```{r, scale variables}
+data$word_score_pc_sc<- scale(data$word_score_pc, center = TRUE, scale = TRUE)
+```
+
+After scaling the variables, try modelling with the scaled variables instead.
+```{r, modelling with scaled variables}
+model1_sc <- lmer(rt ~ word_score_pc_sc + (1|ID) +  (1|word), data=data)
+
+summary(model1_sc)
+```
+
+### Distribution of response time variables
+Response time data is rarely normally distributed. Lets investigate the distribution of reaction times in our data set. Start of by plotting a histogram of the reaction times.
+
+```{r, rt histogram}
+ggplot(aes(x=rt),data=data) + 
+  geom_histogram(fill = 'lightblue') +
+  theme_bw()
+```
+
+#### Using glmer
+lmer() allows you to fit a linear mixed effects model. However, the glmer() gives you the option of fitting a generalized linear model, which can fit other distributions than the normal. Lo and Andrews, 2015 (https://www.frontiersin.org/articles/10.3389/fpsyg.2015.01171/full) suggest to use a gamma-distribution for response time data. Try this on your data!
+
+If you want to know more about reaction times and their distributions, this blog-post is a great resource: https://lindeloev.shinyapps.io/shiny-rt/
+
+```{r, generalized linear model}
+model2 <- glmer(rt ~ word_score_pc_sc + (1|ID), data=data, family=Gamma(link='identity'))
+
+summary(model2)
+```
+
+**Question:** What difference does it make to use the gamma-distribution instead of a normal distribution?
+
+
+## Data plotting and reporting
+
+### Plotting
+Make plots of the data that can inform you on the hypotheses you put forward earlier. You may also want to make a nice table with summary stats.
+```{r, plotting}
+ggplot(aes(x = word_label, y = rt), data = data) +
+  geom_boxplot() +
+  theme_bw()
+```
+
+```{r, table summary}
+data %>% group_by(word_label) %>%  summarise(mean(rt))
+```
+
+
+
+### Reporting
+Write up the results using APA standards. This section or a modified version can be used in your exam project if you end up using the WordFace data!
+```{r}
+# no need for code just putting this chunk here so you realize that this is an exercise :DD
+```
+
+
+## Relating behavioural analysis to EEG/fMRI analysis
+Given your behavioural results, are there anything that would be interesting to investigate using EEG or fMRI analysis? How would you conduct such an analysis to gain more insight on your hypothesis?
+```{r}
+# no need for code just putting this chunk here so you realize that this is an exercise :DD
+```
+
+
+
