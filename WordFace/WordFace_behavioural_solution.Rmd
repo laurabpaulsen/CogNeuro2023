@@ -32,7 +32,7 @@ In this class, we will look at the behavioral data from those that have particip
 This class should give you a head start on your final project if you choose to use the WordFace experiment data (both EEG and fMRI). It is designed for you to start thinking about the possibilities with the WordFace experimental design, and prepare an analysis of the behavioural data which might come in handy when doing your final project. 
 
 # Data
-The data uploaded by you to Brightspace has been gathered and can be found through this link XXXXXX.
+The data uploaded by you to Brightspace has been gathered and can be found on brightspace under todays class!
 
 ## Experimental design
 In the experiment, participants see a word for each trial, followed by either a happy or fearful emoji. Their task is to press a button (b - index finger) if the face is happy and another (y - middle finger) if the face is fearful. 
